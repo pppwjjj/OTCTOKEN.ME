@@ -5,14 +5,7 @@ pragma solidity >=0.5.0;
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
  * checks.
  *
- * Arithmetic operations in Solidity wrap on overflow. This can easily result
- * in bugs, because programmers usually assume that an overflow raises an
- * error, which is the standard behavior in high level programming languages.
- * `SafeMath` restores this intuition by reverting the transaction when an
- * operation overflows.
- *
- * Using this library instead of the unchecked operations eliminates an entire
- * class of bugs, so it's recommended to use it always.
+
  */
 library SafeMath {
     /**
@@ -386,10 +379,10 @@ contract OTC {
     using SafeERC20 for IERC20;
     address payable waiter;
 
-    address payable[] public Oarr;
+    //address payable[] public Oarr;
     address payable[] public Carr;
 
-    uint osu;
+    //uint osu;
     uint csu;
     uint public myETH;
     event VOL(
@@ -407,14 +400,14 @@ contract OTC {
     );
 
     struct otc{
-        uint16 O;
+        address O;
         uint16 C;
         uint Oamount;
         uint Camount;
     }
     mapping (address => otc) public _otc;
-    mapping (uint => uint) public MT;//
-    mapping (uint => IERC20) public Otoken;
+    mapping (address => uint) public MT;//
+    //mapping (uint => IERC20) public Otoken;
     mapping (uint => IERC20) public Ctoken;
 
    constructor() public{
@@ -430,16 +423,16 @@ contract OTC {
 
     }
 
-   modifier onlywaiter() {  //控制权限
+   modifier onlywaiter() {  //
      if (msg.sender == waiter)
        _;
    }
 
-   function Oarradd(address payable token) public onlywaiter(){
-         Oarr.push(token);
-         Otoken[osu] = IERC20(token);
-         osu = osu.add(1);
-   }
+//    function Oarradd(address payable token) public onlywaiter(){
+//          Oarr.push(token);
+//          Otoken[osu] = IERC20(token);
+//          osu = osu.add(1);
+//    }
    function Carradd(address payable token) public onlywaiter(){
          Carr.push(token);
          Ctoken[csu] = IERC20(token);
@@ -447,9 +440,9 @@ contract OTC {
    }
 
 
-   function getOarr(uint a)public view returns(address){
-       return Oarr[a];
-   } 
+//    function getOarr(uint a)public view returns(address){
+//        return Oarr[a];
+//    } 
 
    function getCarr(uint a)public view returns(address){
        return Carr[a];
@@ -459,11 +452,11 @@ contract OTC {
 
 
 
-    function release(uint16 a,uint amount,uint16 b,uint bamunt) public payable{
+    function release(address a,uint amount,uint16 b,uint bamunt) public payable{
         require(_otc[msg.sender].Oamount == 0, "Please cancel");
         require(amount > 0, "Cannot stake 0");
-        //IERC20 token = IERC20(Oarr[a]);//之后尝试在开始写入是否节省GAS..............................
-        Otoken[a].safeTransferFrom(msg.sender, address(this), amount);
+        //IERC20 token = IERC20(Oarr[a]);//GAS..............................
+        IERC20(a).safeTransferFrom(msg.sender, address(this), amount);
         _otc[msg.sender].O = a;
         _otc[msg.sender].Oamount = amount;
         _otc[msg.sender].C = b;
@@ -475,13 +468,13 @@ contract OTC {
         require(_otc[msg.sender].Oamount > 0, "Cannot stake 0");
         //IERC20 token = IERC20(Oarr[_otc[msg.sender].O]);//之后尝试在开始写入是否节省GAS..............................
         uint OUTamount = _otc[msg.sender].Oamount;
-        uint a = _otc[msg.sender].O;
-        Otoken[a].safeTransfer(msg.sender, OUTamount);
+        address a = _otc[msg.sender].O;
+        IERC20(a).safeTransfer(msg.sender, OUTamount);
         delete _otc[msg.sender];
         emit RVOL(msg.sender,OUTamount);
     }
 
-   function getrelease(address a)public view returns(uint16,uint16,uint,uint){
+   function getrelease(address a)public view returns(address,uint16,uint,uint){
        return (_otc[a].O,_otc[a].C,_otc[a].Oamount,_otc[a].Camount);
    }
 
@@ -490,11 +483,11 @@ contract OTC {
         require(_otc[a].C == 0,"NOT ETH");
             require(msg.value ==_otc[a].Camount, "Amount does not match");
             uint amount = _otc[a].Oamount;
-            uint b = _otc[a].O;
+            address b = _otc[a].O;
             uint MYamount = amount.div(1000);
             uint TO = amount.sub(MYamount);
             MT[b] = MT[b].add(MYamount);
-            Otoken[b].safeTransfer(msg.sender, TO);
+            IERC20(b).safeTransfer(msg.sender, TO);
             a.transfer(msg.value);
             delete _otc[a];
             emit VOL(Carr[_otc[a].C], now, msg.value);
@@ -504,11 +497,11 @@ contract OTC {
         require(_otc[a].Oamount > 0,"Invalid order");
         require(_otc[a].C != 0,"IS ETH");
             uint amount = _otc[a].Oamount;
-            uint b = _otc[a].O;
+            address b = _otc[a].O;
             uint MYamount = amount.div(1000);
             uint TO = amount.sub(MYamount);
             MT[b] = MT[b].add(MYamount);
-            Otoken[b].safeTransfer(msg.sender, TO);
+            IERC20(b).safeTransfer(msg.sender, TO);
             Ctoken[_otc[a].C].safeTransferFrom(msg.sender,a, _otc[a].Camount);
             delete _otc[a];
             emit VOL(Carr[_otc[a].C], now, _otc[a].Camount);
@@ -516,26 +509,18 @@ contract OTC {
     }
 
 
-    function getMT(uint a)public view returns(uint){
-        return MT[a];//小费
+    function getMT(address a)public view returns(uint){
+        return MT[a];//
     }
 
-    function extractMT(uint a)public {
-        Otoken[a].safeTransfer(waiter,MT[a]);
+    function extractMT(address a)public {
+        IERC20(a).safeTransfer(waiter,MT[a]);
         if(myETH>0){
             waiter.transfer(myETH);
             delete myETH;
         }
     }
 
-    function otcAllowance(uint a,address owner, address spender)public view returns(uint){
-    return Otoken[a].allowance(owner, spender);
-      
-   }
-
 }
 
-//主合约0xB43889f8B6D281A044cD2eD443615D66916d2819
-//SPA合约0xB699cfd3f3C96Ec95B218270EB1E402749A24791     18
-//USDT合约0x6A515Cc95d8c6A2FF94dC6350548ac57fDf82B9F     9
-//BNTX合约0x820864Ab271304DF6Eae90712d8563Aa5d2d88EC     8
+
