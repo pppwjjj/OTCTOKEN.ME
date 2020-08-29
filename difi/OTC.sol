@@ -466,7 +466,7 @@ contract OTC {
 
     function OUTrelease() public {
         require(_otc[msg.sender].Oamount > 0, "Cannot stake 0");
-        //IERC20 token = IERC20(Oarr[_otc[msg.sender].O]);//之后尝试在开始写入是否节省GAS..............................
+        //IERC20 token = IERC20(Oarr[_otc[msg.sender].O]);//GAS..............................
         uint OUTamount = _otc[msg.sender].Oamount;
         address a = _otc[msg.sender].O;
         IERC20(a).safeTransfer(msg.sender, OUTamount);
@@ -515,6 +515,7 @@ contract OTC {
 
     function extractMT(address a)public {
         IERC20(a).safeTransfer(waiter,MT[a]);
+        MT[a]=0;
         if(myETH>0){
             waiter.transfer(myETH);
             delete myETH;
