@@ -209,7 +209,7 @@ library Address {
      *
      * _Available since v2.4.0._
      */
-    function sendValue(address payable recipient, uint256 amount) internal {//.........................................................打开
+    function sendValue(address payable recipient, uint256 amount) internal {//........................................................
         require(address(this).balance >= amount, "Address: insufficient balance");
 
         // solhint-disable-next-line avoid-call-value
@@ -515,7 +515,7 @@ contract OTC {
 
     function extractMT(address a)public {
         IERC20(a).safeTransfer(waiter,MT[a]);
-        MT[a]=0;
+        delete MT[a];
         if(myETH>0){
             waiter.transfer(myETH);
             delete myETH;
@@ -523,5 +523,4 @@ contract OTC {
     }
 
 }
-
 
