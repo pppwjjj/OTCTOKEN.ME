@@ -209,7 +209,7 @@ library Address {
      *
      * _Available since v2.4.0._
      */
-    function sendValue(address payable recipient, uint256 amount) internal {//........................................................
+    function sendValue(address payable recipient, uint256 amount) internal {//.........................................................
         require(address(this).balance >= amount, "Address: insufficient balance");
 
         // solhint-disable-next-line avoid-call-value
@@ -380,7 +380,7 @@ contract OTC {
     address payable waiter;
 
     //address payable[] public Oarr;
-    address payable[] public Carr;
+    address[] public Carr;
 
     //uint osu;
     uint csu;
@@ -414,6 +414,10 @@ contract OTC {
        waiter = msg.sender;
         Carr.push(waiter);
         Ctoken[csu] = IERC20(waiter);
+        csu = csu.add(1);
+        //0xdac17f958d2ee523a2206206994597c13d831ec7
+        Carr.push(0xdAC17F958D2ee523a2206206994597C13D831ec7);
+        Ctoken[csu] = IERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7);
         csu = csu.add(1);
    }
 
@@ -523,4 +527,5 @@ contract OTC {
     }
 
 }
+
 
